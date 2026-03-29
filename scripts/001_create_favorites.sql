@@ -25,19 +25,6 @@ CREATE POLICY "Users can delete their own favorites"
   ON public.favorites FOR DELETE 
   USING (auth.uid() = user_id);
 
--- Allow anonymous users to view favorites (for localStorage fallback)
-CREATE POLICY "Allow anonymous read for demo" 
-  ON public.favorites FOR SELECT 
-  USING (user_id IS NULL);
-
-CREATE POLICY "Allow anonymous insert for demo" 
-  ON public.favorites FOR INSERT 
-  WITH CHECK (user_id IS NULL);
-
-CREATE POLICY "Allow anonymous delete for demo" 
-  ON public.favorites FOR DELETE 
-  USING (user_id IS NULL);
-
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON public.favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_coin_id ON public.favorites(coin_id);
