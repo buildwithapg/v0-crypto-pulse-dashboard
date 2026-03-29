@@ -71,12 +71,13 @@ export function WhaleAlerts() {
     // Initialize with mock data
     setAlerts(generateMockWhaleAlerts());
 
-    // Add new alerts periodically
+    // Add new alerts periodically - faster for live market feel
     const interval = setInterval(() => {
       const newAlert = generateMockWhaleAlerts()[0];
       newAlert.timestamp = Date.now();
+      newAlert.id = `tx-${Date.now()}-${Math.random()}`;
       setAlerts((prev) => [newAlert, ...prev.slice(0, 19)]);
-    }, 15000);
+    }, 5000); // New whale alert every 5 seconds
 
     return () => clearInterval(interval);
   }, []);

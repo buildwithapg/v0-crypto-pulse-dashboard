@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import { Header } from "./header";
 import { PriceTicker } from "./price-ticker";
@@ -15,17 +15,79 @@ import type { CoinData } from "@/lib/types";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+// Simulate realistic price movements
+function simulatePriceChange(price: number, volatility: number = 0.002): number {
+  const change = (Math.random() - 0.5) * 2 * volatility;
+  return price * (1 + change);
+}
+
 export function Dashboard() {
   const [selectedCoin, setSelectedCoin] = useState<CoinData | null>(null);
+  const [liveCoins, setLiveCoins] = useState<CoinData[]>([]);
+  const initializedRef = useRef(false);
 
   const { data: coins, error, isLoading } = useSWR<CoinData[]>(
     "/api/coins",
     fetcher,
     {
-      refreshInterval: 30000, // Refresh every 30 seconds
+      refreshInterval: 60000, // Refresh from API every 60 seconds
       revalidateOnFocus: true,
     }
   );
+
+  // Initialize live coins when API data arrives
+  useEffect(() => {
+    if (coins && coins.length > 0 && !initializedRef.current) {
+      setLiveCoins(coins);
+      initializedRef.current = true;
+    }
+  }, [coins]);
+
+  // Simulate live price movements
+  useEffect(() => {
+    if (liveCoins.length === 0) return;
+
+    const interval = setInterval(() => {
+      setLiveCoins((prevCoins) => {
+        // Randomly update 3-8 coins each tick for realistic market feel
+        const numToUpdate = Math.floor(Math.random() * 6) + 3;
+        const indicesToUpdate = new Set<number>();
+        
+        while (indicesToUpdate.size < numToUpdate && indicesToUpdate.size < prevCoins.length) {
+          indicesToUpdate.add(Math.floor(Math.random() * prevCoins.length));
+        }
+
+        return prevCoins.map((coin, index) => {
+          if (!indicesToUpdate.has(index)) return coin;
+
+          // Higher volatility for smaller cap coins
+          const volatility = coin.market_cap_rank <= 10 ? 0.001 : 
+                           coin.market_cap_rank <= 50 ? 0.002 : 0.004;
+          
+          const newPrice = simulatePriceChange(coin.current_price, volatility);
+          const priceChange = ((newPrice - coin.current_price) / coin.current_price) * 100;
+          
+          return {
+            ...coin,
+            current_price: newPrice,
+            price_change_percentage_24h: coin.price_change_percentage_24h + priceChange * 0.1,
+          };
+        });
+      });
+    }, 1500); // Update every 1.5 seconds
+
+    return () => clearInterval(interval);
+  }, [liveCoins.length]);
+
+  // Update selected coin reference when prices change
+  useEffect(() => {
+    if (selectedCoin && liveCoins.length > 0) {
+      const updated = liveCoins.find((c) => c.id === selectedCoin.id);
+      if (updated && updated.current_price !== selectedCoin.current_price) {
+        setSelectedCoin(updated);
+      }
+    }
+  }, [liveCoins, selectedCoin]);
 
   if (isLoading) {
     return (
@@ -49,9 +111,12 @@ export function Dashboard() {
     );
   }
 
+  // Use liveCoins if available, otherwise fall back to API data
+  const displayCoins = liveCoins.length > 0 ? liveCoins : coins;
+
   // Set default selected coin
-  if (!selectedCoin && coins.length > 0) {
-    setSelectedCoin(coins[0]);
+  if (!selectedCoin && displayCoins.length > 0) {
+    setSelectedCoin(displayCoins[0]);
   }
 
   return (
@@ -59,18 +124,18 @@ export function Dashboard() {
       <Header />
       
       {/* Price Ticker */}
-      <PriceTicker coins={coins} />
+      <PriceTicker coins={displayCoins} />
 
       <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
         {/* Stats Cards */}
-        <StatsCards coins={coins} />
+        <StatsCards coins={displayCoins} />
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left Column - Table */}
           <div className="xl:col-span-2">
             <CoinTable
-              coins={coins}
+              coins={displayCoins}
               onSelectCoin={setSelectedCoin}
               selectedCoin={selectedCoin}
             />

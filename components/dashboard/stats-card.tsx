@@ -61,11 +61,20 @@ export function StatsCards({ coins }: StatsCardsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="glass border-border/50 glass-hover transition-all">
+        <Card key={index} className="glass border-border/50 glass-hover transition-all relative overflow-hidden">
+          {index === 0 && (
+            <div className="absolute top-2 right-2 flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-green opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-green"></span>
+              </span>
+              <span className="text-[10px] text-neon-green font-medium">LIVE</span>
+            </div>
+          )}
           <CardContent className="p-4">
             <div className="flex items-start justify-between mb-2">
               <span className="text-xs text-muted-foreground">{stat.label}</span>
-              <stat.icon className="w-4 h-4 text-primary/70" />
+              {index !== 0 && <stat.icon className="w-4 h-4 text-primary/70" />}
             </div>
             <div className="text-xl font-bold font-mono">{stat.value}</div>
             {stat.change !== undefined && (

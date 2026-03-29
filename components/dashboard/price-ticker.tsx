@@ -11,54 +11,46 @@ interface TickerCoin {
   price: number;
   change: number;
   image: string;
+  priceDirection?: "up" | "down" | null;
 }
 
 export function PriceTicker({ coins }: { coins: CoinData[] }) {
   const [tickerCoins, setTickerCoins] = useState<TickerCoin[]>([]);
-  const wsRef = useRef<WebSocket | null>(null);
-  const pricesRef = useRef<Map<string, number>>(new Map());
+  const prevPricesRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
-    // Initialize with CoinGecko data
-    const initialCoins = coins.slice(0, 20).map((coin) => ({
-      id: coin.id,
-      symbol: coin.symbol.toUpperCase(),
-      name: coin.name,
-      price: coin.current_price,
-      change: coin.price_change_percentage_24h,
-      image: coin.image,
-    }));
-    setTickerCoins(initialCoins);
-    initialCoins.forEach((coin) => pricesRef.current.set(coin.symbol, coin.price));
-
-    // Connect to Binance WebSocket for real-time updates
-    const symbols = initialCoins
-      .map((c) => `${c.symbol.toLowerCase()}usdt@ticker`)
-      .join("/");
-    
-    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbols}`);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.s) {
-        const symbol = data.s.replace("USDT", "");
-        const price = parseFloat(data.c);
-        const change = parseFloat(data.P);
-
-        setTickerCoins((prev) =>
-          prev.map((coin) =>
-            coin.symbol === symbol
-              ? { ...coin, price, change }
-              : coin
-          )
-        );
+    // Update ticker with new prices from parent
+    const updatedCoins = coins.slice(0, 20).map((coin) => {
+      const prevPrice = prevPricesRef.current.get(coin.id);
+      let priceDirection: "up" | "down" | null = null;
+      
+      if (prevPrice !== undefined && prevPrice !== coin.current_price) {
+        priceDirection = coin.current_price > prevPrice ? "up" : "down";
       }
-    };
+      
+      prevPricesRef.current.set(coin.id, coin.current_price);
 
-    return () => {
-      ws.close();
-    };
+      return {
+        id: coin.id,
+        symbol: coin.symbol.toUpperCase(),
+        name: coin.name,
+        price: coin.current_price,
+        change: coin.price_change_percentage_24h,
+        image: coin.image,
+        priceDirection,
+      };
+    });
+
+    setTickerCoins(updatedCoins);
+
+    // Clear price direction indicators after animation
+    const timeout = setTimeout(() => {
+      setTickerCoins((prev) =>
+        prev.map((coin) => ({ ...coin, priceDirection: null }))
+      );
+    }, 800);
+
+    return () => clearTimeout(timeout);
   }, [coins]);
 
   const formatPrice = (price: number) => {
@@ -84,7 +76,15 @@ export function PriceTicker({ coins }: { coins: CoinData[] }) {
               className="w-6 h-6 rounded-full"
             />
             <span className="font-medium text-foreground">{coin.symbol}</span>
-            <span className="font-mono text-sm text-foreground/90">
+            <span 
+              className={`font-mono text-sm transition-colors duration-300 ${
+                coin.priceDirection === "up" 
+                  ? "text-neon-green" 
+                  : coin.priceDirection === "down" 
+                  ? "text-neon-red" 
+                  : "text-foreground/90"
+              }`}
+            >
               {formatPrice(coin.price)}
             </span>
             <span

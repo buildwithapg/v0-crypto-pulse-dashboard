@@ -48,10 +48,34 @@ export function SentimentCard() {
   useEffect(() => {
     setSentiment(generateSentiment());
 
-    // Update every 30 seconds
+    // Update more frequently for live market feel
     const interval = setInterval(() => {
-      setSentiment(generateSentiment());
-    }, 30000);
+      setSentiment((prev) => {
+        if (!prev) return generateSentiment();
+        // Small incremental changes for smooth transitions
+        const delta = (Math.random() - 0.5) * 8;
+        const newPositive = Math.max(20, Math.min(70, prev.positive + delta));
+        const newNegative = Math.max(10, Math.min(50, prev.negative + (Math.random() - 0.5) * 6));
+        const newNeutral = 100 - newPositive - newNegative;
+        
+        let overall: "bullish" | "bearish" | "neutral";
+        if (newPositive > newNegative + 15) overall = "bullish";
+        else if (newNegative > newPositive + 10) overall = "bearish";
+        else overall = "neutral";
+
+        return {
+          positive: Math.round(newPositive),
+          negative: Math.round(newNegative),
+          neutral: Math.round(newNeutral),
+          overall,
+          sources: {
+            twitter: Math.max(20, Math.min(80, prev.sources.twitter + (Math.random() - 0.5) * 5)),
+            reddit: Math.max(20, Math.min(80, prev.sources.reddit + (Math.random() - 0.5) * 5)),
+            news: Math.max(20, Math.min(80, prev.sources.news + (Math.random() - 0.5) * 5)),
+          },
+        };
+      });
+    }, 4000); // Update every 4 seconds
 
     return () => clearInterval(interval);
   }, []);

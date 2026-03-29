@@ -200,19 +200,49 @@
 
 /* Number animations */
 @keyframes number-up {
-  0% { color: var(--neon-green); }
-  100% { color: var(--foreground); }
+  0% { 
+    color: var(--neon-green); 
+    text-shadow: 0 0 8px var(--neon-green);
+  }
+  100% { 
+    color: var(--foreground); 
+    text-shadow: none;
+  }
 }
 
 @keyframes number-down {
-  0% { color: var(--neon-red); }
-  100% { color: var(--foreground); }
+  0% { 
+    color: var(--neon-red); 
+    text-shadow: 0 0 8px var(--neon-red);
+  }
+  100% { 
+    color: var(--foreground); 
+    text-shadow: none;
+  }
+}
+
+@keyframes flash-up {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: oklch(0.85 0.25 145 / 0.15); }
+}
+
+@keyframes flash-down {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: oklch(0.7 0.25 25 / 0.15); }
 }
 
 .price-up {
-  animation: number-up 1s ease-out;
+  animation: number-up 0.8s ease-out;
 }
 
 .price-down {
-  animation: number-down 1s ease-out;
+  animation: number-down 0.8s ease-out;
+}
+
+.row-flash-up {
+  animation: flash-up 0.6s ease-out;
+}
+
+.row-flash-down {
+  animation: flash-down 0.6s ease-out;
 }
