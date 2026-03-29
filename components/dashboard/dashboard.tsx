@@ -160,10 +160,13 @@ export function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="glass border-t border-border/50 py-4">
+      <footer className="glass-strong border-t border-primary/20 py-4 mt-8">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted-foreground">
-          <p>Data provided by CoinGecko & Binance</p>
-          <p>Built with Next.js & TradingView</p>
+          <p className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse" />
+            Data provided by CoinGecko & Binance
+          </p>
+          <p className="text-primary/70">Built with Next.js & TradingView</p>
         </div>
       </footer>
     </div>

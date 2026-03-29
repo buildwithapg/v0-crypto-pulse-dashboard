@@ -40,27 +40,27 @@ export function Header() {
   };
 
   return (
-    <header className="glass border-b border-border/50 sticky top-0 z-50">
+    <header className="glass-strong border-b border-primary/20 sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Activity className="w-5 h-5 text-primary-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center glass-glow">
+              <Activity className="w-5 h-5 text-primary" />
             </div>
             <span className="text-xl font-bold tracking-tight">
-              Crypto<span className="text-primary">Pulse</span>
+              Crypto<span className="text-gradient-cyan">Pulse</span>
             </span>
           </div>
           <Badge
             variant="outline"
-            className={`text-xs ${
+            className={`text-xs font-medium ${
               isLive
-                ? "text-neon-green border-neon-green/30 bg-neon-green/10"
+                ? "text-neon-cyan border-neon-cyan/40 bg-neon-cyan/10 shadow-[0_0_12px_oklch(0.85_0.18_195/0.3)]"
                 : "text-muted-foreground"
             }`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isLive ? "bg-neon-green animate-pulse" : "bg-muted-foreground"}`} />
-            {isLive ? "Live" : "Offline"}
+            <span className={`w-2 h-2 rounded-full mr-1.5 ${isLive ? "bg-neon-cyan animate-pulse shadow-[0_0_8px_oklch(0.85_0.18_195)]" : "bg-muted-foreground"}`} />
+            {isLive ? "LIVE" : "Offline"}
           </Badge>
         </div>
 

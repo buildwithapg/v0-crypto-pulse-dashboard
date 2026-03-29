@@ -164,10 +164,10 @@ export function CoinTable({ coins, onSelectCoin, selectedCoin }: CoinTableProps)
   };
 
   return (
-    <Card className="glass border-border/50">
-      <CardHeader className="pb-4">
+    <Card className="glass border-primary/20 overflow-hidden">
+      <CardHeader className="pb-4 border-b border-primary/10">
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <CardTitle className="text-lg font-semibold">Market Overview</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gradient-cyan">Market Overview</CardTitle>
           <div className="flex gap-2">
             <div className="relative flex-1 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
